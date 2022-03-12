@@ -10,6 +10,6 @@ if ( !is_admin() ) {
 ?>
 <form method="post" action="options.php">
     <?php 
-        // settings_fields( CHPT_TEXTDOMAIN . '_settings' );
+        // settings_fields( AIPC_TEXTDOMAIN . '_settings' );
     ?>
 </form>

@@ -1,2 +1,2 @@
-# wordpress-plugin-template
-Wordpress plugin template
+# ai-product-categories-woocommerce
+Wordpress plugin that suggests the correct category for uncategorized Woocommerce products.
