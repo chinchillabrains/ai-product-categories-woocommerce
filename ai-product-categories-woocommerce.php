@@ -48,12 +48,36 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
             // Register plugin settings fields
             // register_setting( AIPC_PREFIX . '_settings', AIPC_PREFIX . '_email_message', array('sanitize_callback' => array( 'AI_Product_Categories', 'sanitize_code' ) ) );
 
+            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+
             add_action( 'aipc_gather_categories_data', array( $this, 'gather_data_init' ) );
 
             add_action( 'aipc_process_gathering', array( $this, 'gather_batch_data' ) );
 
             add_action( 'aipc_data_gathering_finished', array( $this, 'gather_data_finish' ) );
         }
+
+        public function enqueue_admin_scripts( $screen ) {
+            global $post;
+            if ( empty( $post ) ) {
+                return;
+            }
+            $screen = get_current_screen();
+            if ( 'post' === $screen->base && 'product' === $post->post_type ) {
+
+                // Add parent names to $suggestions
+                $suggestions = Tools::get_category_suggestions( $post->ID );
+                $plugin_data = [
+                    'categories'    => $suggestions,
+                    'listTitle'     => __( 'Suggested Categories', AIPC_TEXTDOMAIN ),
+                ];
+                wp_enqueue_style( AIPC_TEXTDOMAIN . '-admin-stylesheet', plugins_url( 'assets/css/style.css', __FILE__ ) );
+                wp_enqueue_script( AIPC_TEXTDOMAIN . '-admin-script', plugins_url( 'assets/js/script.js', __FILE__ ), array( 'jquery' ) );
+                wp_localize_script( AIPC_TEXTDOMAIN . '-admin-script', 'aipcplugin', $plugin_data );
+            }
+        }
+
+
 
         public function gather_batch_data () {
             $pending_categories = get_option( 'aipc_categories_to_gather' );
