@@ -15,9 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Aipc_Tools\Tools as Tools;
+use Aipc\Tools as Tools;
+use Aipc\Admin as Admin;
 
 if ( ! class_exists( 'AI_Product_Categories' ) ) {
+
+    require_once( __DIR__ . '/ai-product-categories-woocommerce.admin.php' );
 
     require_once( __DIR__ . '/Tools.class.php' );
 
@@ -39,7 +42,7 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
             // add_action( 'init', array( $this, 'add_translation_files' ) );
 
             // Admin page
-            // add_action('admin_menu', array( $this, 'setup_menu' ));
+            add_action('admin_menu', array( $this, 'setup_menu' ));
 
 
             // Add settings link to plugins page
@@ -55,6 +58,20 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
             add_action( 'aipc_process_gathering', array( $this, 'gather_batch_data' ) );
 
             add_action( 'aipc_data_gathering_finished', array( $this, 'gather_data_finish' ) );
+
+            add_filter( 'aipc_skip_product', array( '\Aipc\Tools', 'skip_suggestions_for_product' ), 10, 2 );
+
+            add_action( 'admin_head', array( $this, 'add_product_to_skip_list' ) );
+        }
+
+        public function add_product_to_skip_list () {
+            if ( ! isset( $_GET['aipc-product-add-skip-list'] ) ) {
+                return;
+            }
+            $product_id = intval( $_GET['aipc-product-add-skip-list'] );
+            $ids_to_skip = get_option( 'aipc_product_ids_to_skip' );
+            $ids_to_skip[] = $product_id;
+            update_option( 'aipc_product_ids_to_skip', $ids_to_skip );
         }
 
         public function enqueue_admin_scripts( $screen ) {
@@ -64,12 +81,18 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
             }
             $screen = get_current_screen();
             if ( 'post' === $screen->base && 'product' === $post->post_type ) {
-
                 // Add parent names to $suggestions
                 $suggestions = Tools::get_category_suggestions( $post->ID );
+                $skip_suggestions = apply_filters( 'aipc_skip_product', $post->ID, $suggestions );
+                if ( $skip_suggestions ) {
+                    return;
+                }
                 $plugin_data = [
-                    'categories'    => $suggestions,
-                    'listTitle'     => __( 'Suggested Categories', AIPC_TEXTDOMAIN ),
+                    'categories'            => $suggestions,
+                    'listTitle'             => esc_html__( 'Suggested Categories', AIPC_TEXTDOMAIN ),
+                    'skipSuggestionsLabel'  => esc_html__( 'Disable suggestions for this product', AIPC_TEXTDOMAIN ),
+                    'productId'             => $post->ID,
+                    'adminUrl'              => admin_url(),
                 ];
                 wp_enqueue_style( AIPC_TEXTDOMAIN . '-admin-stylesheet', plugins_url( 'assets/css/style.css', __FILE__ ) );
                 wp_enqueue_script( AIPC_TEXTDOMAIN . '-admin-script', plugins_url( 'assets/js/script.js', __FILE__ ), array( 'jquery' ) );
@@ -154,16 +177,12 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
 
         public function setup_menu() {
             add_management_page(
-                __( 'AI Product Categories', AIPC_TEXTDOMAIN ),
-                __( 'AI Product Categories', AIPC_TEXTDOMAIN ),
+                __( 'AI Categories', AIPC_TEXTDOMAIN ),
+                __( 'AI Categories', AIPC_TEXTDOMAIN ),
                 'manage_options',
                 AIPC_PREFIX . '_settings_page',
-                array( $this, 'admin_panel_page' )
+                array( '\Aipc\Admin', 'init' )
             );
-        }
-
-        public function admin_panel_page(){
-            require_once( __DIR__ . '/ai-product-categories-woocommerce.admin.php' );
         }
 
         public function add_settings_link( $links ) {

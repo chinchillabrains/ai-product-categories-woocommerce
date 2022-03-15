@@ -1,6 +1,6 @@
 <?php
 
-namespace Aipc_Tools;
+namespace Aipc;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -37,11 +37,11 @@ class Tools {
                 'aipc_find_cat'     => $category_id,
             );
     
-            add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( '\Aipc_Tools\Tools', 'find_category' ), 100, 2 );
+            add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( '\Aipc\Tools', 'find_category' ), 100, 2 );
     
             $products = wc_get_products( $args );
     
-            remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( '\Aipc_Tools\Tools', 'find_category' ), 100, 2 );
+            remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( '\Aipc\Tools', 'find_category' ), 100, 2 );
             if ( ! empty( $products ) ) {
                 foreach ( $products as $product ) {
                     $product_titles[] = $product->get_title();
@@ -91,7 +91,7 @@ class Tools {
                 'match_score'       => $item_term_match,
             ];
         }
-        usort( $matches, '\Aipc_Tools\Tools::sort_by_match_score' );
+        usort( $matches, '\Aipc\Tools::sort_by_match_score' );
         $ret_arr = [];
         $return_matches = 5;
         foreach ( $matches as $match ) {
@@ -124,6 +124,26 @@ class Tools {
     public static function sort_by_match_score ( $first, $second ) {
         $result = $second['match_score'] - $first['match_score'];
         return $result > 0 ? 1 : -1;
+    }
+
+    public static function skip_suggestions_for_product ( $product_id, $suggestions_list ) {
+        $ids_to_skip = get_option( 'aipc_product_ids_to_skip' );
+        if ( is_array( $ids_to_skip ) && in_array( $product_id, $ids_to_skip ) ) {
+            return true;
+        }
+        $product = wc_get_product( $product_id );
+        $product_category_ids = $product->get_category_ids();
+        $has_suggested_category = false;
+        foreach ( $suggestions_list as $suggestion ) {
+            if ( in_array( $suggestion['term_id'], $product_category_ids ) ) {
+                $has_suggested_category = true;
+                break;
+            }
+        }
+        if ( $has_suggested_category ) {
+            return true;
+        }
+        return false;
     }
 
     private static function format_suggestions_list ( $term_list ) {

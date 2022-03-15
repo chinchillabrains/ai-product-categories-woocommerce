@@ -6,3 +6,12 @@
 .aipc-category-select h4 {
     margin: 10px 0;
 }
+
+.aipc-skip-suggestions {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.aipc-skip-suggestions:hover {
+    text-decoration: none;
+}
