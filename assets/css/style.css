@@ -15,3 +15,68 @@
 .aipc-skip-suggestions:hover {
     text-decoration: none;
 }
+
+.aipc-settings__disabledsuggestionsEnable {
+    display: inline-flex;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    border: 1px solid gray;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.aipc-settings__disabledsuggestionsEnable span {
+    display: inline-block;
+    width: 8px;
+    height: 1px;
+    background-color: #333;
+    position: absolute;
+    left: 3px;
+    top: 7px;
+}
+.aipc-settings__disabledsuggestionsEnable span:first-child {
+    transform: rotate(45deg);
+}
+.aipc-settings__disabledsuggestionsEnable span:nth-child(2) {
+    transform: rotate(-45deg);
+}
+.aipc-settings__disabledsuggestionsList {
+    border: 1px solid #333;
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 2px;
+    background-color: white;
+}
+
+.aipc-settings__disabledsuggestionsItem {
+    margin: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid lightgray;
+}
+
+.aipc-settings__disabledsuggestionsItem:last-child {
+    border-bottom: none;
+}
+
+.aipc-settings__systemstatusLabel {
+    font-weight: bold;
+    padding-left: 20px;
+}
+
+.aipc-green {
+    color: rgb(60, 131, 60);
+}
+.aipc-orange {
+    color: rgb(218, 165, 67);
+}
+.aipc-red {
+    color: rgb(206, 73, 73);
+}
+
+.aipc-settings__systemstatusLabelExtra {
+    color: #333 !important;
+    font-weight: normal !important;
+}

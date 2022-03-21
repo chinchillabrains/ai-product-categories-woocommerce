@@ -61,25 +61,39 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
 
             add_filter( 'aipc_skip_product', array( '\Aipc\Tools', 'skip_suggestions_for_product' ), 10, 2 );
 
-            add_action( 'admin_head', array( $this, 'add_product_to_skip_list' ) );
+            add_action( 'admin_head', array( $this, 'update_product_skip_list' ) );
+
+            add_action( 'admin_head', array( $this, 'schedule_gathering_data' ) );
+            
         }
 
-        public function add_product_to_skip_list () {
-            if ( ! isset( $_GET['aipc-product-add-skip-list'] ) ) {
-                return;
+        public function update_product_skip_list () {
+            if ( ! empty( $_GET['aipc-product-add-skip-list'] ) ) {
+                $product_id = intval( $_GET['aipc-product-add-skip-list'] );
+                $ids_to_skip = get_option( 'aipc_product_ids_to_skip' );
+                $ids_to_skip[] = $product_id;
+                update_option( 'aipc_product_ids_to_skip', $ids_to_skip );
             }
-            $product_id = intval( $_GET['aipc-product-add-skip-list'] );
-            $ids_to_skip = get_option( 'aipc_product_ids_to_skip' );
-            $ids_to_skip[] = $product_id;
-            update_option( 'aipc_product_ids_to_skip', $ids_to_skip );
+            if ( ! empty( $_GET['aipc-product-remove-skip-list'] ) ) {
+                $product_id = intval( $_GET['aipc-product-remove-skip-list'] );
+                $ids_to_skip = get_option( 'aipc_product_ids_to_skip' );
+                $ids_to_skip = array_diff( $ids_to_skip, [ $product_id ] );
+                update_option( 'aipc_product_ids_to_skip', $ids_to_skip );
+            }
+        }
+
+        public function schedule_gathering_data () {
+            if ( ! empty( $_GET['aipc-gather-data'] ) && '1' === $_GET['aipc-gather-data'] ) {
+                $this->gather_data_init();
+            }
         }
 
         public function enqueue_admin_scripts( $screen ) {
             global $post;
-            if ( empty( $post ) ) {
+            $screen = get_current_screen();
+            if ( empty( $post ) && $screen->base !== 'tools_page_aipc_settings_page' ) {
                 return;
             }
-            $screen = get_current_screen();
             if ( 'post' === $screen->base && 'product' === $post->post_type ) {
                 // Add parent names to $suggestions
                 $suggestions = Tools::get_category_suggestions( $post->ID );
@@ -97,6 +111,13 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
                 wp_enqueue_style( AIPC_TEXTDOMAIN . '-admin-stylesheet', plugins_url( 'assets/css/style.css', __FILE__ ) );
                 wp_enqueue_script( AIPC_TEXTDOMAIN . '-admin-script', plugins_url( 'assets/js/script.js', __FILE__ ), array( 'jquery' ) );
                 wp_localize_script( AIPC_TEXTDOMAIN . '-admin-script', 'aipcplugin', $plugin_data );
+            } else if ( $screen->base == 'tools_page_aipc_settings_page' ) {
+                $plugin_data = [
+                    'adminUrl'              => admin_url(),
+                ];
+                wp_enqueue_style( AIPC_TEXTDOMAIN . '-admin-stylesheet', plugins_url( 'assets/css/style.css', __FILE__ ) );
+                wp_enqueue_script( AIPC_TEXTDOMAIN . '-admin-options-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ) );
+                wp_localize_script( AIPC_TEXTDOMAIN . '-admin-options-script', 'aipcplugin', $plugin_data );
             }
         }
 
@@ -135,7 +156,6 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
 
         public function gather_data_init () {
             if ( ! as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ) {
-                //
                 $terms = get_terms(
                     array(
                         'taxonomy'   => 'product_cat',

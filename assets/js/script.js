@@ -4,7 +4,6 @@ jQuery(document).ready(function ($) {
     $('.aipc-skip-suggestions').click(function (e) {
         e.preventDefault();
         var productId = $(this).data('id');
-        console.log(productId);
         var url = aipcplugin.adminUrl;
         const xhttp = new XMLHttpRequest();
         xhttp.open("GET", url + '?aipc-product-add-skip-list=' + productId, true);
