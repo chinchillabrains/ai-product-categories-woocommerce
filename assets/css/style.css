@@ -80,3 +80,8 @@
     color: #333 !important;
     font-weight: normal !important;
 }
+
+.aipc-settings__gatherdataButton--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}

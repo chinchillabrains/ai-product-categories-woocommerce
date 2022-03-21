@@ -49,6 +49,7 @@ class Admin {
         $gather_data_btn_label = __( 'Gather Data', AIPC_TEXTDOMAIN );
         $disabled_suggestions_html = self::get_disabled_products_widget();
         $status = self::get_service_status();
+        $gather_data_class = ( as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ? 'aipc-settings__gatherdataButton--disabled' : '' );
         $extra_status_txt = '';
         if ( ! empty( $status['extra_txt'] ) ) {
             $extra_status_txt = '<small class="aipc-settings__systemstatusLabelExtra"><em> (' . esc_html( $status['extra_txt'] ) . ')</em></small>';
@@ -61,7 +62,7 @@ class Admin {
                 <div class="aipc-settings__gatherdata">
                     <h4 class="aipc-settings__gatherdataTitle"><?= __( 'Gather Data', AIPC_TEXTDOMAIN ) ?></h4>
                     <p>
-                        <button class="aipc-settings__gatherdataButton"><?= $gather_data_btn_label ?></button>
+                        <button class="aipc-settings__gatherdataButton <?= esc_html( $gather_data_class ) ?>"><?= $gather_data_btn_label ?></button>
                     </p>
                 </div>
                 <div class="aipc-settings__disabledsuggestions">
