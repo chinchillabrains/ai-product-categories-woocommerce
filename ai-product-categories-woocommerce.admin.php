@@ -62,7 +62,7 @@ class Admin {
                 <div class="aipc-settings__gatherdata">
                     <h4 class="aipc-settings__gatherdataTitle"><?= __( 'Gather Data', AIPC_TEXTDOMAIN ) ?></h4>
                     <p>
-                        <button class="aipc-settings__gatherdataButton <?= esc_html( $gather_data_class ) ?>"><?= $gather_data_btn_label ?></button>
+                        <button class="aipc-settings__gatherdataButton button-primary <?= esc_html( $gather_data_class ) ?>"><?= $gather_data_btn_label ?></button>
                     </p>
                 </div>
                 <div class="aipc-settings__disabledsuggestions">
