@@ -11,43 +11,11 @@ class Admin {
     protected static $instance = null;
 
     public function __construct () {
-        // add_filter( 'woocommerce_get_sections_products', array( $this, 'aipc_add_section' ) );
-        // add_filter( 'woocommerce_get_settings_products', array( $this, 'aipc_admin_settings' ), 10, 2 );
         $this->render_admin_page();
     }
 
-    // public function aipc_admin_settings ( $settings, $current_section ) {
-    //     var_dump( $settings );
-    //     if ( $current_section !== 'aipcsettings' ) {
-    //         return $settings;
-    //     }
-    //     // Title
-    //     $settings[] = array( 
-    //         'name' => __( 'AI Product Categories Settings', 'text-domain' ),
-    //         'type' => 'title',
-    //         // 'desc' => __( '', AIPC_TEXTDOMAIN ),
-    //         'id' => 'aipc_settings',
-    //     );
-    //     // Enable/Disable Toggle
-    //     $settings[] = array(
-	// 		'name'     => __( 'Auto-insert into single product page', 'text-domain' ),
-	// 		'desc_tip' => __( 'This will automatically insert your slider into the single product page', 'text-domain' ),
-	// 		'id'       => 'wcslider_auto_insert',
-	// 		'type'     => 'checkbox',
-	// 		'css'      => 'min-width:300px;',
-	// 		'desc'     => __( 'Enable Auto-Insert', 'text-domain' ),
-	// 	);
-    //     return $settings;
-    // }
-
-    // public function aipc_add_section ( $sections ) {
-    //     $sections['aipcsettings'] = __( 'AI Categories Suggestions', AIPC_TEXTDOMAIN );
-    //     return $sections;
-    // }
-
     private function render_admin_page () {
-        $gather_data_btn_label = __( 'Gather Data', AIPC_TEXTDOMAIN );
-        $disabled_suggestions_html = self::get_disabled_products_widget();
+        $disabled_suggestions = self::get_disabled_products();
         $status = self::get_service_status();
         $gather_data_class = ( as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ? 'aipc-settings__gatherdataButton--disabled' : '' );
         $extra_status_txt = '';
@@ -58,30 +26,44 @@ class Admin {
         ?>
         <div class="aipc-settings__outer">
             <div class="aipc-settings">
-                <h2 class="aipc-settings__title"><?= __( 'AI Product Categories Settings', AIPC_TEXTDOMAIN ) ?></h2>
+                <h2 class="aipc-settings__title"><?php _e( 'AI Product Categories Settings', AIPC_TEXTDOMAIN ) ?></h2>
                 <div class="aipc-settings__gatherdata">
-                    <h4 class="aipc-settings__gatherdataTitle"><?= __( 'Gather Data', AIPC_TEXTDOMAIN ) ?></h4>
+                    <h4 class="aipc-settings__gatherdataTitle"><?php _e( 'Gather Data', AIPC_TEXTDOMAIN ) ?></h4>
                     <p>
-                        <button class="aipc-settings__gatherdataButton button-primary <?= esc_html( $gather_data_class ) ?>"><?= $gather_data_btn_label ?></button>
+                        <button class="aipc-settings__gatherdataButton button-primary <?php echo esc_html( $gather_data_class ) ?>"><?php _e( 'Gather Data', AIPC_TEXTDOMAIN ); ?></button>
                     </p>
                 </div>
                 <div class="aipc-settings__disabledsuggestions">
-                    <h4 class="aipc-settings__disabledsuggestionsTitle"><?= __( 'Disabled Suggestions', AIPC_TEXTDOMAIN ) ?></h4>
-                    <?= $disabled_suggestions_html ?>
+                    <h4 class="aipc-settings__disabledsuggestionsTitle"><?php _e( 'Disabled Suggestions', AIPC_TEXTDOMAIN ) ?></h4>
+                    <ul class="aipc-settings__disabledsuggestionsList">
+                    <?php
+                        if ( empty( $disabled_suggestions ) ) {
+                            _e( 'List is empty.', AIPC_TEXTDOMAIN );
+                        } else {
+                            foreach ( $disabled_suggestions as $product ) {
+                                ?>
+                                <li data-id="<?php echo esc_attr( $product['id'] ) ?>" class="aipc-settings__disabledsuggestionsItem">
+                                    <span><?php echo esc_html( $product['title'] ) ?></span> <span class="aipc-settings__disabledsuggestionsEnable"><span></span><span></span></span>
+                                </li>
+                                <?php
+                            }
+                        }
+                    ?>
+                    </ul>
                 </div>
                 <div class="aipc-settings__systemstatus">
-                    <h4 class="aipc-settings__systemstatusTitle"><?= __( 'System Status', AIPC_TEXTDOMAIN ) ?></h4>
-                    <p class="aipc-settings__systemstatusLabel aipc-<?= esc_attr( $status['color'] ) ?>"><?= esc_html( $status['label'] ) . $extra_status_txt ?></p>
+                    <h4 class="aipc-settings__systemstatusTitle"><?php _e( 'System Status', AIPC_TEXTDOMAIN ) ?></h4>
+                    <p class="aipc-settings__systemstatusLabel aipc-<?php echo esc_attr( $status['color'] ) ?>"><?php echo esc_html( $status['label'] ) . $extra_status_txt ?></p>
                 </div>
             </div>
         </div>
         <?php
     }
 
-    private function get_disabled_products_widget () {
+    private function get_disabled_products () {
         $product_ids = get_option( 'aipc_product_ids_to_skip' );
         if ( empty( $product_ids ) ) {
-            return __( 'List is empty.', AIPC_TEXTDOMAIN );
+            return [];
         }
         $products = [];
         foreach ( $product_ids as $product_id ) {
@@ -94,14 +76,9 @@ class Admin {
             }
         }
         if ( empty( $products ) ) {
-            return __( 'List is empty.', AIPC_TEXTDOMAIN );
+            return [];
         }
-        $ret_html = '<ul class="aipc-settings__disabledsuggestionsList">';
-        foreach ( $products as $product ) {
-            $ret_html .= "<li data-id=\"{$product['id']}\" class=\"aipc-settings__disabledsuggestionsItem\"><span>{$product['title']}</span> <span class=\"aipc-settings__disabledsuggestionsEnable\"><span></span><span></span></span></li>";
-        }
-        $ret_html .= '</ul>';
-        return $ret_html;
+        return $products;
     }
 
     private static function get_service_status () {

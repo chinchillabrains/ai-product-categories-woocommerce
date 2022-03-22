@@ -46,7 +46,7 @@ if ( ! class_exists( 'AI_Product_Categories' ) ) {
 
 
             // Add settings link to plugins page
-            // add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), array( $this, 'add_settings_link' ) );
+            add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), array( $this, 'add_settings_link' ) );
 
             // Register plugin settings fields
             // register_setting( AIPC_PREFIX . '_settings', AIPC_PREFIX . '_email_message', array('sanitize_callback' => array( 'AI_Product_Categories', 'sanitize_code' ) ) );
