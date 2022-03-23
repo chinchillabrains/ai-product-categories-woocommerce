@@ -17,7 +17,7 @@ class Admin {
     private function render_admin_page () {
         $disabled_suggestions = self::get_disabled_products();
         $status = self::get_service_status();
-        $gather_data_class = ( as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ? 'aipc-settings__gatherdataButton--disabled' : '' );
+        $gather_data_class = ( \as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ? 'aipc-settings__gatherdataButton--disabled' : '' );
         $extra_status_txt = '';
         if ( ! empty( $status['extra_txt'] ) ) {
             $extra_status_txt = '<small class="aipc-settings__systemstatusLabelExtra"><em> (' . esc_html( $status['extra_txt'] ) . ')</em></small>';
@@ -84,9 +84,10 @@ class Admin {
     private static function get_service_status () {
         $gathered_data = get_option( 'aipc_data_gathered' );
         $pending_categories = get_option( 'aipc_categories_to_gather' );
+        $pending_categories = ( empty( $pending_categories ) ? [] : $pending_categories );
         $pending_categories_count = count( $pending_categories );
         $has_gathered_data = ( empty( $gathered_data ) ? false : true );
-        $is_gathering_data = ( as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ? true : false );
+        $is_gathering_data = ( \as_has_scheduled_action( 'aipc_process_gathering', [], 'ai-product-categories-woocommerce' ) ? true : false );
 
         // If options are initialized, service is Live / Gathering data - green
         // If options are not initialized, service is Starting / Gathering data - orange

@@ -20,6 +20,10 @@ use Aipc\Admin as Admin;
 
 if ( ! class_exists( 'AI_Product_Categories' ) ) {
 
+
+    // Include action scheduler
+    require_once( __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php' );
+
     require_once( __DIR__ . '/ai-product-categories-woocommerce.admin.php' );
 
     require_once( __DIR__ . '/Tools.class.php' );

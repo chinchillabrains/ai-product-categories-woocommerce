@@ -27,8 +27,8 @@ Users have the ability to disable suggestions for selected products.
 
 == Screenshots ==
 
-1. Settings Page.
-2. Category suggestions in edit product page.
+1. Category suggestions in edit product page.
+2. Settings Page.
 
 == Frequently Asked Questions ==
 
